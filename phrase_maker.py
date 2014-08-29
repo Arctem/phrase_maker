@@ -1,6 +1,9 @@
 import random
 import re
 import sys
+import os
+
+directory = os.path.dirname(__file__)
 
 data = {
     #Generic stuff phrases for everything.
@@ -186,7 +189,7 @@ data = {
         'template' : ['You should {verb} {adverb}.'],
 
         'verb' : ['masturbate', 'poop', 'fart'],
-        'adverb' : open('adverbs.txt', 'r').read().split('\n')
+        'adverb' : open(os.path.join(directory, 'adverbs.txt'), 'r').read().split('\n')
     }
 }
 
