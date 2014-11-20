@@ -52,6 +52,11 @@ def replace_vars(dict, orig, regex, name, fixed_data):
         to_replace = regex.findall(orig)[0]
         field = to_replace.strip('{}')
         field = field.split('}[') #Split if we have the optional arg
+
+        #if we have multiple comma-separated fields, choose one
+        if ',' in field[0]:
+            field[0] = random.choice(field[0].split(','))
+
         cap = field[0] != field[0].lower()
         field[0] = field[0].lower()
         word = ''
