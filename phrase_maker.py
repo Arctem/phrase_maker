@@ -32,7 +32,7 @@ def load_module(module):
 
 
 #Really stupid method to basically make a format that works better for what I'm doing.
-def make(dict_name, name = 'Dudeface'):
+def make(dict_name, name = 'Dudeface', capitalize = True):
     dict = data[dict_name]
     orig = random.choice(dict['template'])
     fixed_data = {}
@@ -43,9 +43,11 @@ def make(dict_name, name = 'Dudeface'):
     
     orig = fix_articles(orig)
     orig = fix_capitals(orig)
-    orig = orig.split()
-    orig[0] = orig[0].capitalize()
-    return ' '.join(orig)
+    if capitalize:
+        orig = orig.split()
+        orig[0] = orig[0].capitalize()
+        orig = ' '.join(orig)
+    return orig
 
 def replace_vars(dict, orig, regex, name, fixed_data):
     while len(regex.findall(orig)) > 0:
