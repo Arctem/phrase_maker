@@ -130,8 +130,8 @@ def fix_punctuation(orig):
     while orig.count('....'):
         orig = orig.replace('....', '...')
 
-    #now temporarily convert '...' into a temp unicode char ( ) to preserve it
-    orig = orig.replace('...', ' ')
+    #now temporarily convert '...' into a temp unicode char (…) to preserve it
+    orig = orig.replace('...', u'…')
 
     #get rid of ..
     orig = orig.replace('..', '.')
@@ -147,7 +147,7 @@ def fix_punctuation(orig):
 
     #undo the previous substitution
 
-    orig = orig.replace('…', '...')
+    orig = orig.replace(u'…', '...')
     return orig
 
 def get_categories(dict_name):
