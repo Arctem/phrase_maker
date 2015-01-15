@@ -12,7 +12,7 @@ data = {
         'karst' : ['Karst', 'Flannery', 'Flanneroo'],
 
         'num_either' : ['{number}', '{roman_number}'],
-        
+
         'number' : ['{digit}{number}', '{digit}'],
         'digit' : '1234567890',
 
@@ -38,15 +38,16 @@ def make(dict_name, name = 'Dudeface', capitalize = True):
     fixed_data = {}
     #regex = re.compile('{.+?}')
     regex = re.compile('''{.+?}(?:\[.+?\])?''')
-    
+
     orig = replace_vars(dict, orig, regex, name, fixed_data)
-    
+
     orig = fix_articles(orig)
     orig = fix_capitals(orig)
     if capitalize:
         orig = orig.split()
         orig[0] = orig[0].capitalize()
         orig = ' '.join(orig)
+    orig = fix_punctuation(orig)
     return orig
 
 def replace_vars(dict, orig, regex, name, fixed_data):
@@ -62,7 +63,7 @@ def replace_vars(dict, orig, regex, name, fixed_data):
         cap = field[0] != field[0].lower()
         field[0] = field[0].lower()
         word = ''
-        
+
         #Check for existing data.
         if len(field) > 1 and field[1] in fixed_data.keys():
             word = fixed_data[field[1]]
@@ -79,7 +80,7 @@ def replace_vars(dict, orig, regex, name, fixed_data):
             #continue
         else:
             word = random.choice(dict[field[0]])
- 
+
         #Handle all the extra vars inside the new word before we store it in fixed_data.
         word = replace_vars(dict, word, regex, name, fixed_data)
 
@@ -101,7 +102,7 @@ def make_capital(orig):
         else:
             orig[i] = orig[i][0].capitalize() + orig[i][1:]
     return ' '.join(orig)
-    
+
 #Makes sure sentences start with capitals.
 def fix_capitals(orig):
     orig = orig.split()
@@ -119,6 +120,31 @@ def fix_articles(orig):
             else:
                 orig[i] = 'a'
     return ' '.join(orig)
+
+def fix_punctuation(orig):
+    #find_punc = re.compile('''[.!?][.!?]+''')
+
+    #reduce sequences of . to 3 max
+    while orig.count('....'):
+        orig = orig.replace('....', '...')
+
+    #now temporarily convert '...' into a temp unicode char (…) to preserve it
+    orig = orig.replace('...', '…')
+
+    #get rid of ..
+    orig = orig.replace('..', '.')
+
+    #let ! override .
+    orig = orig.replace('!.', '!').replace('.!', '!')
+
+    #let ? override .
+    orig = orig.replace('?.', '?').replace('.?', '?')
+
+    #standardize !? and ?!
+    orig = orig.replace('!?', '‽').replace('?!', '‽')
+
+    #undo the previous substitution
+    orig = orig.replace('…', '...')
 
 def get_categories(dict_name):
     if dict_name in data.keys():
