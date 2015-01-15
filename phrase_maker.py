@@ -145,6 +145,7 @@ def fix_punctuation(orig):
 
     #undo the previous substitution
     orig = orig.replace('…', '...')
+    return orig
 
 def get_categories(dict_name):
     if dict_name in data.keys():
