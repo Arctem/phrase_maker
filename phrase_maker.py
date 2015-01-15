@@ -1,3 +1,5 @@
+# -*- coding: latin-1 -*-
+
 import random
 import re
 import sys
@@ -128,8 +130,8 @@ def fix_punctuation(orig):
     while orig.count('....'):
         orig = orig.replace('....', '...')
 
-    #now temporarily convert '...' into a temp unicode char (…) to preserve it
-    orig = orig.replace('...', '…')
+    #now temporarily convert '...' into a temp unicode char ( ) to preserve it
+    orig = orig.replace('...', ' ')
 
     #get rid of ..
     orig = orig.replace('..', '.')
@@ -141,9 +143,10 @@ def fix_punctuation(orig):
     orig = orig.replace('?.', '?').replace('.?', '?')
 
     #standardize !? and ?!
-    orig = orig.replace('!?', '‽').replace('?!', '‽')
+    orig = orig.replace('!?', ' ').replace('?!', ' ')
 
     #undo the previous substitution
+
     orig = orig.replace('…', '...')
     return orig
 
