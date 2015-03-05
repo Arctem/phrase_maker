@@ -59,6 +59,7 @@ def replace_vars(dict, orig, regex, name, fixed_data):
         field = field.split('}[') #Split if we have the optional arg
 
         #if we have multiple comma-separated fields, choose one
+        #TODO: add weights based on number of elements
         if ',' in field[0]:
             field[0] = random.choice(field[0].split(','))
 
