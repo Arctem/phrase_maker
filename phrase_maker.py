@@ -21,6 +21,9 @@ data = {
         'roman_number' : ['{roman_ones}']*3 + ['{roman_tens}{roman_ones}'],
         'roman_tens' : ['X'],
         'roman_ones' : ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'],
+
+        'weekday' : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+            'Friday', 'Saturday'],
     }
 }
 
