@@ -49,9 +49,10 @@ def make(dict_name, name = 'Dudeface', capitalize = True):
     orig = fix_articles(orig)
     orig = fix_capitals(orig)
     if capitalize:
-        orig = orig.split()
-        orig[0] = orig[0].capitalize()
-        orig = ' '.join(orig)
+        for char in ' \n':
+            orig = orig.split(char)
+            orig[0] = orig[0].capitalize()
+            orig = char.join(orig)
     orig = fix_punctuation(orig)
     return orig
 
@@ -99,33 +100,44 @@ def replace_vars(dict, orig, regex, name, fixed_data):
     return orig
 
 def make_capital(orig):
-    orig = orig.split()
-    for i in range(len(orig)):
-        if i is not 0 and orig[i] in ['of', 'the', 'a']:
-            continue
-        if orig[i][0] == '{':
-            orig[i] = orig[i][0] + orig[i][1].capitalize() + orig[i][2:]
-        else:
-            orig[i] = orig[i][0].capitalize() + orig[i][1:]
-    return ' '.join(orig)
+    for char in ' \n':
+        orig = orig.split(char)
+        for i in range(len(orig)):
+            if i is not 0 and orig[i] in ['of', 'the', 'a']:
+                continue
+            if orig[i][0] == '{':
+                orig[i] = orig[i][0] + orig[i][1].capitalize() + orig[i][2:]
+            else:
+                orig[i] = orig[i][0].capitalize() + orig[i][1:]
+        orig = char.join(orig)
+    return orig
 
 #Makes sure sentences start with capitals.
 def fix_capitals(orig):
-    orig = orig.split()
-    for i in range(len(orig) - 1):
-        if i is 0 or orig[i - 1][-1] in '.?!':
-            orig[i] = orig[i].capitalize()
-    return ' '.join(orig)
+    for char in ' \n':
+        orig = orig.split(char)
+        for i in range(len(orig) - 1):
+            if i is 0 or orig[i - 1][-1] in '.?!':
+                if char == '\n':
+                    tmp = orig[i].split(' ')
+                    tmp[0] = tmp[0].capitalize()
+                    orig[i] = ' '.join(tmp)
+                else:
+                    orig[i] = orig[i].capitalize()
+        orig = char.join(orig)
+    return orig
 
 def fix_articles(orig):
-    orig = orig.split()
-    for i in range(len(orig) - 1):
-        if orig[i] == 'a' or orig[i] == 'an':
-            if orig[i + 1][0].lower() in 'aeiou':
-                orig[i] = 'an'
-            else:
-                orig[i] = 'a'
-    return ' '.join(orig)
+    for char in ' \n':
+        orig = orig.split(char)
+        for i in range(len(orig) - 1):
+            if orig[i] == 'a' or orig[i] == 'an':
+                if orig[i + 1][0].lower() in 'aeiou':
+                    orig[i] = 'an'
+                else:
+                    orig[i] = 'a'
+        orig = char.join(orig)
+    return orig
 
 def fix_punctuation(orig):
     #find_punc = re.compile('''[.!?][.!?]+''')
