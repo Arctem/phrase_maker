@@ -5,9 +5,11 @@ import re
 import sys
 
 data = {
-    #Generic stuff phrases for everything.
+    #Some general use phrases.
     'gen' : {
         'template' : ['this is only so tests don\'t crash'],
+
+        'username' : ['{.}[username]'],
 
         'vowel' : list('aeiouy'),
         'consonant' : list('bcdfghjklmnpqrstvwxyz'),
@@ -27,6 +29,15 @@ data = {
     }
 }
 
+_library_match = '(?:([!,{}]+?)/)'
+_book_match = _library_match + '?(.+?)'
+_books_match = '(?P<books>' + _book_match + '(?:,' + _book_match + ')*)'
+_name_match = '''\[(?P<name>.+?)\]'''
+
+_search_string = '{' + _books_match + '}' + '(?:' + _name_match + ')?'
+
+TAG_REGEX = re.compile(_search_string)
+
 def load_module(module):
     new_data = module.data
     for i in new_data.keys():
@@ -36,67 +47,57 @@ def load_module(module):
             data[i] = new_data[i]
 
 
-#Really stupid method to basically make a format that works better for what I'm doing.
-def make(dict_name, name = 'Dudeface', capitalize = True):
-    dict = data[dict_name]
-    orig = random.choice(dict['template'])
-    fixed_data = {}
-    #regex = re.compile('{.+?}')
-    regex = re.compile('''{.+?}(?:\[.+?\])?''')
+#Constructs a full random string using the named library.
+def make(lib_name, name = 'Dudeface', capitalize = True):
+    orig = random.choice(data[lib_name]['template'])
+    fixed_data = {'username': name}
 
-    orig = replace_vars(dict, orig, regex, name, fixed_data)
+    orig = replace_tags(lib_name, orig, fixed_data)
 
     orig = fix_articles(orig)
     orig = fix_capitals(orig)
     if capitalize:
-        for char in ' \n':
-            orig = orig.split(char)
-            orig[0] = orig[0].capitalize()
-            orig = char.join(orig)
+        lines = orig.split('\n')
+        for i in range(len(lines)):
+            line = lines[i].split(' ', 1)
+            line[0] = line[0].capitalize()
+            lines[i] = ' '.join(line)
+        orig = '\n'.join(lines)
     orig = fix_punctuation(orig)
     return orig
 
-def replace_vars(dict, orig, regex, name, fixed_data):
-    while len(regex.findall(orig)) > 0:
-        to_replace = regex.findall(orig)[0]
-        field = to_replace.strip('{}')
-        field = field.split('}[') #Split if we have the optional arg
+def replace_tags(lib_name, orig, fixed_data):
+    while TAG_REGEX.search(orig) is not None:
+        to_replace = TAG_REGEX.search(orig)
+        books = to_replace.group('books')
+        name = to_replace.group('name')
 
         #if we have multiple comma-separated fields, choose one
         #TODO: add weights based on number of elements
-        if ',' in field[0]:
-            field[0] = random.choice(field[0].split(','))
+        book = random.choice(books.split(','))
 
-        cap = field[0] != field[0].lower()
-        field[0] = field[0].lower()
-        word = ''
+        capitalize = book[0] != book[0].lower()
+        book = book.lower()
 
-        #Check for existing data.
-        if len(field) > 1 and field[1] in fixed_data.keys():
-            word = fixed_data[field[1]]
-        elif '/' in field[0]:
-            field[0] = field[0].split('/')
-            word = random.choice(data[field[0][0]][field[0][1]])
-            word = word.replace('{', '{' + field[0][0] + '/')
-        elif field[0] not in dict.keys():
-            if field[0] != 'username':
-                print(field[0])
-            #orig = orig.replace('{username}', name, 1)
-            #orig = orig.replace('{Username}', name.capitalize(), 1)
-            word = name
-            #continue
+        if '/' in book:
+            library, book = book.split('/', 1)
         else:
-            word = random.choice(dict[field[0]])
+            library = lib_name
+
+        if name and name in fixed_data:
+            word = fixed_data[name]
+        else:
+            word = random.choice(data[library][book])
 
         #Handle all the extra vars inside the new word before we store it in fixed_data.
-        word = replace_vars(dict, word, regex, name, fixed_data)
+        word = replace_tags(library, word, fixed_data)
 
-        if len(field) > 1 and field[1] not in fixed_data.keys():
-            fixed_data[field[1]] = word
+        if name and name not in fixed_data:
+            fixed_data[name] = word
 
-        if cap:
+        if capitalize:
             word = make_capital(word)
-        orig = orig.replace(to_replace, word, 1)
+        orig = TAG_REGEX.sub(word, orig, 1)
     return orig
 
 def make_capital(orig):
@@ -116,28 +117,21 @@ def make_capital(orig):
 def fix_capitals(orig):
     for char in ' \n':
         orig = orig.split(char)
-        for i in range(len(orig) - 1):
-            if i is 0 or orig[i - 1][-1] in '.?!':
-                if char == '\n':
-                    tmp = orig[i].split(' ')
-                    tmp[0] = tmp[0].capitalize()
-                    orig[i] = ' '.join(tmp)
-                else:
-                    orig[i] = orig[i].capitalize()
+        for i in range(1, len(orig) - 1):
+            if orig[i - 1][-1] in '.?!':
+                orig[i] = orig[i][0].upper() + orig[i][1:]
         orig = char.join(orig)
     return orig
 
 def fix_articles(orig):
-    for char in ' \n':
-        orig = orig.split(char)
-        for i in range(len(orig) - 1):
-            if orig[i] == 'a' or orig[i] == 'an':
-                if orig[i + 1][0].lower() in 'aeiou':
-                    orig[i] = 'an'
-                else:
-                    orig[i] = 'a'
-        orig = char.join(orig)
-    return orig
+    orig = orig.split(' ')
+    for i in range(len(orig) - 1):
+        if orig[i] == 'a' or orig[i] == 'an':
+            if orig[i + 1][0].lower() in 'aeiou':
+                orig[i] = 'an'
+            else:
+                orig[i] = 'a'
+    return ' '.join(orig)
 
 def fix_punctuation(orig):
     #find_punc = re.compile('''[.!?][.!?]+''')
@@ -159,7 +153,7 @@ def fix_punctuation(orig):
     orig = orig.replace('?.', '?').replace('.?', '?')
 
     #standardize !? and ?!
-    orig = orig.replace('!?', ' ').replace('?!', ' ')
+    orig = orig.replace('!?', '!?').replace('?!', '!?')
 
     #undo the previous substitution
 
