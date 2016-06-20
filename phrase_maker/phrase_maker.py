@@ -17,8 +17,10 @@ data = {
 
         'num_either' : ['{number}', '{roman_number}'],
 
-        'number' : ['{digit}{number}', '{digit}'],
+        'number' : ['{multidigit}', '{digit}'],
+        'multidigit' : ['{number,nonzero}{digit}'],
         'digit' : '1234567890',
+        'nonzero' : '123456789',
 
         'roman_number' : ['{roman_ones}']*3 + ['{roman_tens}{roman_ones}'],
         'roman_tens' : ['X'],
